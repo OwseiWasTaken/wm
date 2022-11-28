@@ -2,4 +2,3 @@ wm
 config.vim
 run.sh
 utils/mouse/out
-apps/*/out
