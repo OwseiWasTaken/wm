@@ -20,17 +20,14 @@ char *Devices[] = {
 	"Mouse"
 };
 
-void Send(char *buff) {
-	int bufflen = strlen(buff);
-	write(talks, buff, bufflen+1);
-	write(talks, &ID, 1);
-}
-
-char *UpdateBuff(char *obuff, char *nbuff, int olen) {
-	for (int i = 0; i<olen; i++) {
-		nbuff[i] = obuff[i];
-	}
-	return nbuff;
+void ASend(pid_t child, char *buff, uint8 bufflen) {
+	printf("%s: write msg len: %d\n", outme, bufflen);
+	write(talks, &bufflen, 1);
+	printf("%s: write whoami: %ld\n", outme, write(talks, &ID, 1));
+	printf("%s: write buff: %ld\n", outme, write(talks, buff, bufflen));
+	// notify parrent
+	printf("%s> sending signal\n", outme);
+	kill(child, SIGUSR1);
 }
 
 msg Receive() {
