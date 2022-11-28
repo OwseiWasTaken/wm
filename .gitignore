@@ -1,5 +1,6 @@
 wm
 config.vim
 run.sh
-./utils/*/out
-./apps/*/out
+utils/*/out
+
+apps/*/out
