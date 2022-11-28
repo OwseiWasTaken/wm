@@ -1,0 +1,5 @@
+wm
+config.vim
+run.sh
+./utils/*/out
+./apps/*/out
