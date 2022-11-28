@@ -1,8 +1,8 @@
 #include "buffy.h"
 
-#define	Blue "\x1b[38;2;0;0;255m"
+#define Blue "\x1b[38;2;0;0;255m"
 #define Yellow "\x1b[38;2;255;255;0m"
-#define	White "\x1b[38;2;255;255;255m"
+#define White "\x1b[38;2;255;255;255m"
 
 typedef struct {
 	uint8 from;
