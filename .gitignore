@@ -1,6 +1,5 @@
 wm
 config.vim
 run.sh
-utils/*/out
-
+utils/mouse/out
 apps/*/out
