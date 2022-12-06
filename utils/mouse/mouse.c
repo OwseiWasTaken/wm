@@ -21,27 +21,6 @@ char* outme = Magenta"[MOUSE"Yellow" IPC"Magenta"]"White;
 // 2 = mouse
 char ID = 2;
 
-// Xsend should be executed in this order
-//
-//void csend(char b) {
-//	printf("%s: write char: %ld\n", outme, write(talks, &b, 1));
-//}
-//
-//void asend(char* b, int len) {
-//	printf("%s: write str: %ld\n", outme, write(talks, &b, len));
-//}
-//
-//void mesend(uint8 bufflen) {
-//	printf("%s: write msg len: %d\n", outme, bufflen);
-//	write(talks, &bufflen, 1);
-//	printf("%s: write whoami: %ld\n", outme, write(talks, &ID, 1));
-//}
-//
-//void ssend() {
-//	kill(getppid(), SIGUSR1);
-//}
-
-// or just send this
 void ASend(char *buff, uint8 bufflen) {
 	printf("%s: write msg len: %d\n", outme, bufflen);
 	write(talks, &bufflen, 1);
@@ -66,11 +45,18 @@ void SendClick(int y, int x) {
 	ASend(msg, 9);
 }
 
+void SegV(int sig) {
+	printf("segmentation fault in Mouse\n");
+	kill(getppid(), SIGSEGV);
+	CloseFb(GlobalJar);
+}
+
 // 8 = released
 // 8+2 =
 // 8+4 = middle
 int main(){
 	printf("%s: started\n", inme);
+	signal(SIGSEGV, SegV);
 
 	struct fbjar jar = InitBuffy();
 	int mice = open("/dev/input/mice", O_RDONLY);
@@ -85,6 +71,7 @@ int main(){
 
 	//polar PointerM = MakePolar(12, 45);
 	//color black = RGB(0,0,0);
+
 	point loc = MakePoint(100,100);
 	uint8 buff[3] = {0};
 	int8 ry, rx;
@@ -107,17 +94,28 @@ int main(){
 		buff[0] = buff[0]>>5;
 		if (buff[0] < (left|middle|right)) {
 			printf("%s: released @ %d,%d\n", inme, loc.y, loc.x);
-			if ((hy+hx) > HOLDMIN) {
-				printf("%s: dragged from %d,%d to %d,%d\n",
-					inme, hy, hx, loc.y, loc.x);
+			if (abs(hy)+abs(hx) > HOLDMIN) {
+				printf("%s: dragged %d,%d -> %d,%d d(%d,%d)\n",
+					inme, hy, hx, loc.y, loc.x, loc.y-hy, loc.x-hx);
 			}
 		}
-		left   = (buff[0]&1)==1;
+		left   = (buff[0]&1);
 		right  = (buff[0]&2);
 		middle = (buff[0]&4);
-		rx = buff[1];
-		ry = buff[2];
-		if (!(right|left|middle)) {
+		if (middle) {
+			printf("%d,%d m(%d,%d)\n", loc.y, loc.x, jar.rows, jar.cols);
+		}
+		if (loc.x < jar.cols) {
+			rx = buff[1];
+		} else {
+			rx = -1;
+		}
+		if (loc.y < jar.rows) {
+			ry = buff[2];
+		} else {
+			ry = -1;
+		}
+		if (!(buff[0])) {
 			hx = 0;
 			hy = 0;
 		} else {
@@ -135,6 +133,11 @@ int main(){
 				printf("%s: pressed middle button @ %d,%d\n", inme, loc.y, loc.x);
 			}
 		}
+		//if (left) {
+		//	Rem_R = 255;
+		//	Rem_G = 255;
+		//	Rem_B = 255;
+		//}
 		//swap bitmap
 		draw[at+0] = Rem_B;
 		draw[at+1] = Rem_G;
